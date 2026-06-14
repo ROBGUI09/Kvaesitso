@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -230,6 +231,10 @@ fun SearchColumn(
                     userScrollEnabled = userScrollEnabled && !quickAccessHoldActive,
                     contentPadding = paddingValues,
                     reverseLayout = reverse,
+                    modifier = if (displayedAlphabetLetters.isNotEmpty()) Modifier
+                        .padding(
+                            end = 54.dp,
+                        ) else Modifier,
                 ) {
                     if (!hideFavs && favoritesEnabled) {
                         SearchFavorites(
@@ -415,7 +420,7 @@ fun SearchColumn(
                     AppAlphabetScroller(
                         letters = displayedAlphabetLetters,
                         activeLetter = activeAlphabetLetter,
-                        maxVisibleLetters = 10,
+                        maxVisibleLetters = 31,
                         quickAccessItems = quickAccessItems,
                         selectedQuickAccessTag = selectedTag,
                         onQuickAccessSelected = { tag ->

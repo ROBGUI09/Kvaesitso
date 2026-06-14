@@ -1,10 +1,13 @@
 package de.mm20.launcher2.ui.launcher.search.apps
 
+import com.ibm.icu.text.Transliterator
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,6 +38,7 @@ import de.mm20.launcher2.ui.layout.BottomReversed
 import de.mm20.launcher2.ui.locals.LocalGridSettings
 import java.util.Locale
 import kotlin.math.ceil
+
 
 data class AppAlphabetJumpTarget(
     val letter: String,
@@ -77,31 +81,40 @@ fun buildAppAlphabetJumpTargets(
 }
 
 private fun buildAppSections(apps: List<Application>): List<AppSection> {
-    val sections = mutableListOf<AppSection>()
-    var currentLetter: String? = null
-    var currentItems = mutableListOf<SectionedApp>()
-    for ((index, app) in apps.withIndex()) {
-        val letter = app.labelForGrouping()
-        if (currentLetter != letter) {
-            if (currentLetter != null) {
-                sections.add(AppSection(currentLetter, currentItems))
-            }
-            currentLetter = letter
-            currentItems = mutableListOf()
+    return apps
+        .withIndex()
+        .groupBy { it.value.labelForGrouping() }
+        .toSortedMap()
+        .map { (letter, indexedApps) ->
+            val sectionedApps = indexedApps.map { SectionedApp(it.value, it.index) }
+            AppSection(letter, sectionedApps)
         }
-        currentItems.add(SectionedApp(app, index))
+}
+
+private fun convertToLatin(input: String?): String {
+    if (input.isNullOrEmpty()) {
+        return "#"
     }
-    if (currentLetter != null) {
-        sections.add(AppSection(currentLetter, currentItems))
-    }
-    return sections
+
+    // Android ICU Transliterator requires API level 24 or higher
+    // "Any-Latin" handles automatically detecting and converting any script to Latin
+    // "Transliterator.FORWARD" means we are doing direct transformation
+    val transliterator = Transliterator.getInstance("Any-Latin", Transliterator.FORWARD)
+    return transliterator.transform(input)
 }
 
 private fun Application.labelForGrouping(): String {
     val source = (labelOverride ?: label).trim()
     val firstChar = source.firstOrNull() ?: return "#"
     if (!firstChar.isLetter()) return "#"
-    return firstChar.uppercaseChar().toString().uppercase(Locale.getDefault())
+
+    val latinChar = convertToLatin(firstChar.toString())
+
+    Log.d("app", latinChar);
+
+    val resultChar = latinChar[0] ?: firstChar
+    if (!resultChar.isLetter()) return "#"
+    return resultChar.uppercaseChar().toString().uppercase(Locale.ENGLISH)
 }
 
 @Composable
