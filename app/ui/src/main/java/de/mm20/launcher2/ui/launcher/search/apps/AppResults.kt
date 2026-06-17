@@ -1,9 +1,6 @@
 package de.mm20.launcher2.ui.launcher.search.apps
 
 import com.ibm.icu.text.Transliterator
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -73,9 +70,6 @@ fun buildAppAlphabetJumpTargets(
             val rows = ceil(section.items.size / columns.toFloat()).toInt()
             index += rows + 1
         }
-        if (sectionIndex == 0 && hasBeforeItem) {
-            // The profile tabs are part of the first section header item.
-        }
     }
     return targets
 }
@@ -96,10 +90,7 @@ private fun convertToLatin(input: String?): String {
         return "#"
     }
 
-    // Android ICU Transliterator requires API level 24 or higher
-    // "Any-Latin" handles automatically detecting and converting any script to Latin
-    // "Transliterator.FORWARD" means we are doing direct transformation
-    val transliterator = Transliterator.getInstance("Any-Latin", Transliterator.FORWARD)
+    val transliterator = Transliterator.getInstance("Any-Latin; Latin-ASCII", Transliterator.FORWARD)
     return transliterator.transform(input)
 }
 
@@ -110,9 +101,7 @@ private fun Application.labelForGrouping(): String {
 
     val latinChar = convertToLatin(firstChar.toString())
 
-    Log.d("app", latinChar);
-
-    val resultChar = latinChar[0] ?: firstChar
+    val resultChar = latinChar[0]
     if (!resultChar.isLetter()) return "#"
     return resultChar.uppercaseChar().toString().uppercase(Locale.ENGLISH)
 }
