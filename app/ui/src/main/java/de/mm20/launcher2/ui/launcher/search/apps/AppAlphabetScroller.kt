@@ -405,10 +405,10 @@ fun AppAlphabetScroller(
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .sizeIn(minWidth = if (letter == "*") 34.dp else 30.dp)
-                            .heightIn(min = if (letter == "*") 36.dp else 32.dp)
+                            .heightIn(min = if (letter == "*") 36.dp else 27.dp)
                             .then(letterModifier)
                             .scale(displayScale)
-                            .padding(vertical = 2.dp),
+                            .padding(vertical = 0.dp),
                     )
                 }
             }
